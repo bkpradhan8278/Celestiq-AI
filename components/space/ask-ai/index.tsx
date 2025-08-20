@@ -12,10 +12,10 @@ export const AskAi = () => {
       <textarea
         rows={3}
         className="w-full bg-transparent text-base outline-none text-[#D4AF37] placeholder:text-blue-400/60 p-4 resize-none mb-1 rounded-xl border-2 border-[#D4AF37]/30 focus:border-blue-400 focus:ring-2 focus:ring-blue-400 transition font-orbitron caret-purple-400 animate-cursor-glow"
-        placeholder="Ask Celestiq AI anything..."
+        placeholder="Ask Tapu AI anything..."
         onChange={() => {}}
         onKeyDown={() => {}}
-        aria-label="Ask Celestiq AI anything"
+        aria-label="Ask Tapu AI anything"
       />
       <div className="flex items-center justify-between gap-2 px-4 pb-3">
         <div className="flex-1 flex justify-start">

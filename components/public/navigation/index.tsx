@@ -87,7 +87,7 @@ export default function Navigation() {
         <Link href="/" className="flex items-center gap-1">
           <div className="flex flex-col">
             <p className="font-sans text-white text-xl font-bold leading-tight flex items-center gap-1">
-              🔆 Celestiq AI
+              🔆 App Builder
             </p>
             <span className="text-[10px] text-gray-500 font-normal mt-1 ml-6">
               @ Powered by Tapu AI

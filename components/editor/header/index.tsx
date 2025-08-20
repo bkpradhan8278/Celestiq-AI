@@ -31,7 +31,7 @@ export function Header({
       <div className="flex items-center gap-3">
         <div className="flex flex-col">
           <h1 className="text-xl font-semibold bg-gradient-to-r from-[#D4AF37] via-blue-400 to-purple-500 bg-clip-text text-transparent leading-tight flex items-center gap-1">
-            🔆 Celestiq AI
+            🔆 App Builder
           </h1>
           <span className="text-[10px] text-gray-500 font-normal mt-1 ml-6">
             @ Powered by Tapu AI
@@ -39,6 +39,7 @@ export function Header({
         </div>
       </div>
       <nav className="flex items-center gap-2">
+        {/* Tab Navigation */}
         {TABS.map((item) => (
           <Button
             key={item.value}
@@ -55,6 +56,7 @@ export function Header({
             onClick={() => onNewTab(item.value)}
           >
             <item.icon className="size-4" />
+            <span className="ml-1 hidden sm:inline text-xs">{item.label}</span>
           </Button>
         ))}
       </nav>

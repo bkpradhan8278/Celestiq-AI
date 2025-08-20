@@ -15,6 +15,7 @@ import {
 import classNames from "classnames";
 import { useRouter, useSearchParams } from "next/navigation";
 
+import { Button } from "@/components/ui/button";
 import { Header } from "@/components/editor/header";
 import { Footer } from "@/components/editor/footer";
 import { defaultHTML } from "@/lib/consts";
@@ -177,11 +178,7 @@ export const AppEditor = ({ project }: { project?: Project | null }) => {
   return (
     <section className="h-[100dvh] bg-neutral-950 flex flex-col">
       <Header tab={currentTab} onNewTab={setCurrentTab}>
-        {project?._id ? (
-          <SaveButton html={html} prompts={prompts} />
-        ) : (
-          <DeployButton html={html} prompts={prompts} />
-        )}
+        <SaveButton html={html} prompts={prompts} />
       </Header>
       <main className="bg-neutral-950 flex-1 max-lg:flex-col flex w-full max-lg:h-[calc(100%-82px)] relative">
         {currentTab === "chat" && (
@@ -293,6 +290,7 @@ export const AppEditor = ({ project }: { project?: Project | null }) => {
             />
           </>
         )}
+        
         <Preview
           html={html}
           isResizing={isResizing}
@@ -330,6 +328,8 @@ export const AppEditor = ({ project }: { project?: Project | null }) => {
         iframeRef={iframeRef}
         device={device}
         setDevice={setDevice}
+        currentTab={currentTab}
+        onTabChange={setCurrentTab}
       />
     </section>
   );

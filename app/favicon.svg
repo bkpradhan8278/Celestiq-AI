@@ -1,7 +1,7 @@
 <svg width="500" height="500" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect width="500" height="500" fill="black"/>
   <g>
-    <text x="50%" y="55%" text-anchor="middle" fill="#D4AF37" font-size="56" font-family="sans-serif" font-weight="bold">CELESTIQ AI</text>
+    <text x="50%" y="55%" text-anchor="middle" fill="#D4AF37" font-size="56" font-family="sans-serif" font-weight="bold">APP BUILDER</text>
     <g stroke="#D4AF37" stroke-width="6" fill="none">
       <circle cx="250" cy="250" r="120"/>
       <path d="M250 130 L250 80 M250 370 L250 420 M370 250 L420 250 M130 250 L80 250"/>

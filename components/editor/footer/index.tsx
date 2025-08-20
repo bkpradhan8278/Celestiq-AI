@@ -27,6 +27,8 @@ export function Footer({
   device,
   setDevice,
   iframeRef,
+  currentTab,
+  onTabChange,
 }: {
   onReset: () => void;
   htmlHistory?: HtmlHistory[];
@@ -34,6 +36,8 @@ export function Footer({
   setHtml: (html: string) => void;
   iframeRef?: React.RefObject<HTMLIFrameElement | null>;
   setDevice: React.Dispatch<React.SetStateAction<"desktop" | "mobile">>;
+  currentTab?: string;
+  onTabChange?: (tab: string) => void;
 }) {
   const { user } = useUser();
 
@@ -48,6 +52,21 @@ export function Footer({
     }
   };
 
+  // Handle New button click - mobile switches to chat after reset
+  const handleNewClick = () => {
+    const isMobile = window.innerWidth < 768;
+    
+    // Always do the reset first
+    onReset();
+    
+    // On mobile, switch to chat section after reset
+    if (isMobile && onTabChange) {
+      setTimeout(() => {
+        onTabChange('chat');
+      }, 100); // Small delay to ensure reset completes first
+    }
+  };
+
   return (
     <footer className="w-full py-3 px-4 flex items-center justify-between bg-black/90 backdrop-blur-sm border-t border-neutral-700/50">
       <div className="flex items-center gap-3">
@@ -59,7 +78,7 @@ export function Footer({
           ) : (
             <UserMenu className="!p-1 !pr-3 !h-auto" />
           ))}
-        <Button size="sm" variant="secondary" onClick={onReset} className="bg-[#D4AF37] hover:bg-[#D4AF37]/80 text-black rounded-lg font-medium px-3 py-1.5 text-sm">
+        <Button size="sm" variant="secondary" onClick={handleNewClick} className="bg-[#D4AF37] hover:bg-[#D4AF37]/80 text-black rounded-lg font-medium px-3 py-1.5 text-sm">
           <MdAdd className="size-3 mr-1" />
           New
         </Button>

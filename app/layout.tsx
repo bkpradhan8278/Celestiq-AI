@@ -22,34 +22,34 @@ const ptSans = PT_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Celestiq AI | Build with AI ✨",
+  title: "App Builder | Build with AI ✨",
   description:
-    "Celestiq AI is a web development tool that helps you build websites with AI, no code required. Let's deploy your website with Celestiq AI and enjoy the magic of AI.",
+    "App Builder is a web development tool that helps you build websites with AI, no code required. Let's deploy your website with App Builder and enjoy the magic of AI.",
   openGraph: {
-    title: "Celestiq AI | Build with AI ✨",
+    title: "App Builder | Build with AI ✨",
     description:
-      "Celestiq AI is a web development tool that helps you build websites with AI, no code required. Let's deploy your website with Celestiq AI and enjoy the magic of AI.",
-    url: "https://celestiq-ai.com",
-    siteName: "Celestiq AI",
+      "App Builder is a web development tool that helps you build websites with AI, no code required. Let's deploy your website with App Builder and enjoy the magic of AI.",
+    url: "https://app-builder.com",
+    siteName: "App Builder",
     images: [
       {
   url: "/favicon.svg",
         width: 1200,
         height: 630,
-        alt: "Celestiq AI Open Graph Image",
+        alt: "App Builder Open Graph Image",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Celestiq AI | Build with AI ✨",
+    title: "App Builder | Build with AI ✨",
     description:
-      "Celestiq AI is a web development tool that helps you build websites with AI, no code required. Let's deploy your website with Celestiq AI and enjoy the magic of AI.",
+      "App Builder is a web development tool that helps you build websites with AI, no code required. Let's deploy your website with App Builder and enjoy the magic of AI.",
   images: ["/favicon.svg"],
   },
   appleWebApp: {
     capable: true,
-    title: "Celestiq AI",
+    title: "App Builder",
     statusBarStyle: "black-translucent",
   },
   icons: {

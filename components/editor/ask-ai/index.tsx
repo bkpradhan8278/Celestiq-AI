@@ -346,7 +346,7 @@ export function AskAI({
                 ? `Ask [MY BRAND NAME] about ${selectedElement.tagName.toLowerCase()}...`
                 : hasAsked
                 ? "Ask [MY BRAND NAME] for edits"
-                : "Ask Celestiq AI anything..."
+                : "Ask Tapu AI anything..."
             }
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}

@@ -1,4 +1,4 @@
-# ☀️ Celestiq AI
+# ☀️ App Builder
 
 A futuristic AI-powered website builder with stunning wormhole visual effects. Create beautiful, responsive websites using natural language prompts powered by multiple AI providers.
 
@@ -44,8 +44,8 @@ Experience the future of web design with:
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/your-username/celestiq-ai.git
-   cd celestiq-ai
+   git clone https://github.com/your-username/app-builder.git
+   cd app-builder
    ```
 
 2. **Install dependencies**
@@ -430,7 +430,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
   </body>
 </html>
 ---
-title: Celestiq AI v1
+title: App Builder v1
 emoji: 🐳
 ---
 emoji: 🐳
@@ -447,9 +447,9 @@ models:
 ---
 
 
-# Celestiq AI
+# App Builder
 
-Celestiq AI is an advanced AI-powered coding platform for developers, data scientists, and AI engineers. Effortlessly build, deploy, and manage web projects with generative AI, no code required.
+App Builder is an advanced AI-powered coding platform for developers, data scientists, and AI engineers. Effortlessly build, deploy, and manage web projects with generative AI, no code required.
 
 ## Features
 - AI-powered website generation
@@ -460,8 +460,8 @@ Celestiq AI is an advanced AI-powered coding platform for developers, data scien
 ## Getting Started
 1. **Clone the repository:**
   ```bash
-  git clone https://github.com/yourusername/celestiq-ai.git
-  cd celestiq-ai
+  git clone https://github.com/yourusername/app-builder.git
+  cd app-builder
   ```
 2. **Install dependencies:**
   ```bash

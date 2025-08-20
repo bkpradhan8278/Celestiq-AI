@@ -8,14 +8,185 @@ import { cn } from "@/lib/utils";
 import { GridPattern } from "@/components/magic-ui/grid-pattern";
 import { htmlTagToText } from "@/lib/html-tag-to-text";
 
-// Futuristic Wormhole Background Component (Three.js inspired)
+// Futuristic Wormhole Background Component (Auto Device Detection)
 const WormholeBackground = () => {
   const [isClient, setIsClient] = useState(false);
+  const [deviceType, setDeviceType] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
 
   useEffect(() => {
     setIsClient(true);
+    
+    // Comprehensive device detection
+    const detectDevice = () => {
+      const width = window.innerWidth;
+      const userAgent = navigator.userAgent.toLowerCase();
+      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      
+      // Check for mobile devices
+      const mobileRegex = /android|webos|iphone|ipod|blackberry|iemobile|opera mini/i;
+      const isMobileAgent = mobileRegex.test(userAgent);
+      
+      // Check for tablet devices
+      const tabletRegex = /ipad|android(?!.*mobile)|kindle|silk/i;
+      const isTabletAgent = tabletRegex.test(userAgent);
+      
+      // Determine device type based on multiple factors
+      if (width < 640 || (isMobileAgent && width < 768)) {
+        setDeviceType('mobile');
+      } else if ((width >= 640 && width < 1024) || isTabletAgent || (isTouchDevice && width < 1200)) {
+        setDeviceType('tablet');
+      } else {
+        setDeviceType('desktop');
+      }
+    };
+    
+    detectDevice();
+    window.addEventListener('resize', detectDevice);
+    window.addEventListener('orientationchange', detectDevice);
+    return () => {
+      window.removeEventListener('resize', detectDevice);
+      window.removeEventListener('orientationchange', detectDevice);
+    };
   }, []);
 
+  // Mobile view for smartphones
+  if (deviceType === 'mobile') {
+    return (
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Simplified rings for mobile */}
+        {[...Array(3)].map((_, i) => (
+          <div
+            key={`mobile-ring-${i}`}
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+            style={{
+              animation: isClient ? `simpleSpin ${3 + i * 0.5}s linear infinite` : undefined,
+            }}
+          >
+            <div
+              className="border-2 rounded-full"
+              style={{
+                width: `${60 + i * 30}vw`,
+                height: `${60 + i * 30}vw`,
+                maxWidth: `${120 + i * 40}px`,
+                maxHeight: `${120 + i * 40}px`,
+                borderColor: i % 2 === 0 ? '#00eaff' : '#7b2dff',
+                borderStyle: 'dashed',
+                opacity: 0.4 - i * 0.1,
+                boxShadow: `0 0 ${15 + i * 5}px ${i % 2 === 0 ? '#00eaff' : '#7b2dff'}`,
+              }}
+            />
+          </div>
+        ))}
+        
+        {/* Central glow - simplified */}
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+          <div 
+            className="w-12 h-12 sm:w-16 sm:h-16 rounded-full"
+            style={{
+              background: `radial-gradient(circle, #00eaff 0%, #00eaff/30 50%, transparent 80%)`,
+              boxShadow: `0 0 20px #00eaff`,
+              animation: isClient ? 'simplePulse 1.5s ease-in-out infinite' : undefined,
+            }}
+          />
+        </div>
+
+        {/* Mobile particles - fewer for performance */}
+        {isClient && [...Array(12)].map((_, i) => {
+          const size = 1 + (i % 2) * 0.5;
+          const left = (i * 23) % 100;
+          const top = (i * 37) % 100;
+          
+          return (
+            <div
+              key={`mobile-particle-${i}`}
+              className="absolute rounded-full"
+              style={{
+                width: `${size}px`,
+                height: `${size}px`,
+                left: `${left}%`,
+                top: `${top}%`,
+                background: i % 3 === 0 ? '#00eaff' : i % 3 === 1 ? '#7b2dff' : '#ff2d7b',
+                opacity: 0.5,
+                animation: isClient ? `mobileFloat ${2 + (i % 3)}s ease-in-out infinite` : undefined,
+                animationDelay: `${i * 0.3}s`,
+              }}
+            />
+          );
+        })}
+      </div>
+    );
+  }
+
+  // Tablet view - medium complexity
+  if (deviceType === 'tablet') {
+    return (
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Medium complexity rings for tablet */}
+        {[...Array(5)].map((_, i) => (
+          <div
+            key={`tablet-ring-${i}`}
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+            style={{
+              animation: isClient ? `torusRotate${i % 4} ${2 + i * 0.3}s linear infinite, torusFloat${i % 4} ${2 + i * 0.4}s ease-in-out infinite` : undefined,
+              transformOrigin: 'center center',
+            }}
+          >
+            <div
+              className="border-2 rounded-full"
+              style={{
+                width: `${100 + i * 45}px`,
+                height: `${100 + i * 45}px`,
+                borderColor: i % 3 === 0 ? '#00eaff' : i % 3 === 1 ? '#7b2dff' : '#ff2d7b',
+                borderStyle: i % 2 === 0 ? 'dashed' : 'dotted',
+                borderWidth: `${2 + (i % 2)}px`,
+                opacity: 0.4 - i * 0.05,
+                boxShadow: `0 0 ${12 + i * 4}px ${i % 3 === 0 ? '#00eaff' : i % 3 === 1 ? '#7b2dff' : '#ff2d7b'}`,
+                transform: `rotateX(${40 + i * 6}deg) rotateY(${25 + i * 8}deg)`,
+              }}
+            />
+          </div>
+        ))}
+        
+        {/* Central energy core */}
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+          <div 
+            className="w-20 h-20 rounded-full"
+            style={{
+              background: `radial-gradient(circle, #7b2dff 0%, #00eaff 30%, transparent 70%)`,
+              boxShadow: `0 0 40px #7b2dff, inset 0 0 20px #00eaff`,
+              animation: isClient ? 'gentleGlow 2s ease-in-out infinite' : undefined,
+            }}
+          />
+        </div>
+
+        {/* Tablet particles */}
+        {isClient && [...Array(25)].map((_, i) => {
+          const size = 2 + (i % 3);
+          const left = (i * 17) % 100;
+          const top = (i * 29) % 100;
+          
+          return (
+            <div
+              key={`tablet-particle-${i}`}
+              className="absolute rounded-full"
+              style={{
+                width: `${size}px`,
+                height: `${size}px`,
+                left: `${left}%`,
+                top: `${top}%`,
+                background: i % 4 === 0 ? '#00eaff' : i % 4 === 1 ? '#7b2dff' : i % 4 === 2 ? '#ff2d7b' : '#00ff88',
+                opacity: 0.6,
+                animation: isClient ? `mobileFloat ${1.5 + (i % 4)}s ease-in-out infinite` : undefined,
+                animationDelay: `${i * 0.2}s`,
+              }}
+            />
+          );
+        })}
+      </div>
+    );
+  }
+
+  // Desktop/Laptop view - full complexity
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
       {/* Three.js inspired Torus Rings - Enhanced Sensitivity */}
@@ -263,6 +434,24 @@ const WormholeBackground = () => {
           25% { transform: scale(1.4); opacity: 1; }
           50% { transform: scale(1.8); opacity: 0.8; }
           75% { transform: scale(1.2); opacity: 1; }
+        }
+        
+        /* Mobile-optimized animations */
+        @keyframes simpleSpin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        @keyframes simplePulse {
+          0%, 100% { opacity: 0.4; transform: scale(1); }
+          50% { opacity: 0.8; transform: scale(1.1); }
+        }
+        @keyframes mobileFloat {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-5px); }
+        }
+        @keyframes gentleGlow {
+          0%, 100% { box-shadow: 0 0 10px rgba(124, 58, 237, 0.3); }
+          50% { box-shadow: 0 0 20px rgba(124, 58, 237, 0.6); }
         }
       `}</style>
     </div>
