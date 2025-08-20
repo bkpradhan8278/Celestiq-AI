@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import { FaMobileAlt } from "react-icons/fa";
-import { HelpCircle, RefreshCcw, SparkleIcon } from "lucide-react";
+import { RefreshCcw } from "lucide-react";
 import { FaLaptopCode } from "react-icons/fa6";
 import { HtmlHistory } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -49,70 +49,37 @@ export function Footer({
   };
 
   return (
-    <footer className="border-t bg-slate-200 border-slate-300 dark:bg-neutral-950 dark:border-neutral-800 px-3 py-2 flex items-center justify-between sticky bottom-0 z-20">
-      <div className="flex items-center gap-2">
+    <footer className="w-full py-3 px-4 flex items-center justify-between bg-black/90 backdrop-blur-sm border-t border-neutral-700/50">
+      <div className="flex items-center gap-3">
         {user &&
           (user?.isLocalUse ? (
-            <>
-              <div className="max-w-max bg-amber-500/10 rounded-full px-3 py-1 text-amber-500 border border-amber-500/20 text-sm font-semibold">
-                Local Usage
-              </div>
-            </>
+            <div className="bg-[#D4AF37]/20 text-[#D4AF37] rounded-lg px-3 py-1 text-xs font-medium border border-[#D4AF37]/30">
+              Local
+            </div>
           ) : (
             <UserMenu className="!p-1 !pr-3 !h-auto" />
           ))}
-        {user && <p className="text-neutral-700">|</p>}
-        <Button size="sm" variant="secondary" onClick={onReset}>
-          <MdAdd className="text-sm" />
-          New <span className="max-lg:hidden">Project</span>
+        <Button size="sm" variant="secondary" onClick={onReset} className="bg-[#D4AF37] hover:bg-[#D4AF37]/80 text-black rounded-lg font-medium px-3 py-1.5 text-sm">
+          <MdAdd className="size-3 mr-1" />
+          New
         </Button>
         {htmlHistory && htmlHistory.length > 0 && (
-          <>
-            <p className="text-neutral-700">|</p>
-            <History history={htmlHistory} setHtml={setHtml} />
-          </>
+          <History history={htmlHistory} setHtml={setHtml} />
         )}
       </div>
-      <div className="flex justify-end items-center gap-2.5">
-        <a
-          href="https://huggingface.co/spaces/victor/deepsite-gallery"
-          target="_blank"
-        >
-          <Button size="sm" variant="ghost">
-            <SparkleIcon className="size-3.5" />
-            <span className="max-lg:hidden">DeepSite Gallery</span>
-          </Button>
-        </a>
-        <a
-          target="_blank"
-          href="https://huggingface.co/spaces/enzostvs/deepsite/discussions/157"
-        >
-          <Button size="sm" variant="outline">
-            <HelpCircle className="size-3.5" />
-            <span className="max-lg:hidden">Help</span>
-          </Button>
-        </a>
-        <Button size="sm" variant="outline" onClick={handleRefreshIframe}>
-          <RefreshCcw className="size-3.5" />
-          <span className="max-lg:hidden">Refresh Preview</span>
+      <div className="flex items-center gap-3">
+        <Button size="sm" variant="outline" onClick={handleRefreshIframe} className="border-neutral-600 text-gray-400 hover:text-white hover:border-gray-500 p-2 rounded-lg">
+          <RefreshCcw className="size-4" />
         </Button>
-        <div className="flex items-center rounded-full p-0.5 bg-neutral-700/70 relative overflow-hidden z-0 max-lg:hidden gap-0.5">
-          <div
-            className={classNames(
-              "absolute left-0.5 top-0.5 rounded-full bg-white size-7 -z-[1] transition-all duration-200",
-              {
-                "translate-x-[calc(100%+2px)]": device === "mobile",
-              }
-            )}
-          />
+        <div className="flex items-center bg-neutral-800 rounded-lg p-1 gap-1">
           {DEVICES.map((deviceItem) => (
             <button
               key={deviceItem.name}
               className={classNames(
-                "rounded-full text-neutral-300 size-7 flex items-center justify-center cursor-pointer",
+                "rounded-md text-white size-7 flex items-center justify-center transition-all duration-200",
                 {
-                  "!text-black": device === deviceItem.name,
-                  "hover:bg-neutral-800": device !== deviceItem.name,
+                  "bg-[#D4AF37] text-black": device === deviceItem.name,
+                  "hover:bg-neutral-700": device !== deviceItem.name,
                 }
               )}
               onClick={() => setDevice(deviceItem.name as "desktop" | "mobile")}

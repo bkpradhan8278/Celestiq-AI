@@ -11,7 +11,6 @@ import ProModal from "@/components/pro-modal";
 import { Button } from "@/components/ui/button";
 import { MODELS } from "@/lib/providers";
 import { HtmlHistory } from "@/types";
-import { InviteFriends } from "@/components/invite-friends";
 import { Settings } from "@/components/editor/ask-ai/settings";
 import { LoginModal } from "@/components/login-modal";
 import { ReImagine } from "@/components/editor/ask-ai/re-imagine";
@@ -67,10 +66,6 @@ export function AskAI({
   const [controller, setController] = useState<AbortController | null>(null);
   const [isFollowUp, setIsFollowUp] = useState(true);
 
-  const selectedModel = useMemo(() => {
-    return MODELS.find((m: { value: string }) => m.value === model);
-  }, [model]);
-
   const callAi = async (redesignMarkdown?: string) => {
     if (isAiWorking) return;
     if (!redesignMarkdown && !prompt.trim()) return;
@@ -81,7 +76,6 @@ export function AskAI({
     setIsThinking(true);
 
     let contentResponse = "";
-    let thinkResponse = "";
     let lastRenderTime = 0;
 
     const abortController = new AbortController();
@@ -151,10 +145,6 @@ export function AskAI({
         if (request && request.body) {
           const reader = request.body.getReader();
           const decoder = new TextDecoder("utf-8");
-          const selectedModel = MODELS.find(
-            (m: { value: string }) => m.value === model
-          );
-          let contentThink: string | undefined = undefined;
           const read = async () => {
             const { done, value } = await reader.read();
             if (done) {
@@ -182,9 +172,6 @@ export function AskAI({
               setPrompt("");
               setisAiWorking(false);
               setHasAsked(true);
-              if (selectedModel?.isThinker) {
-                setModel(MODELS[0].value);
-              }
               if (audio.current) audio.current.play();
 
               // Now we have the complete HTML including </html>, so set it to be sure
@@ -200,18 +187,6 @@ export function AskAI({
             }
 
             const chunk = decoder.decode(value, { stream: true });
-            thinkResponse += chunk;
-            if (selectedModel?.isThinker) {
-              const thinkMatch = thinkResponse.match(/<think>[\s\S]*/)?.[0];
-              if (thinkMatch && !thinkResponse?.includes("</think>")) {
-                if ((contentThink?.length ?? 0) < 3) {
-                  setOpenThink(true);
-                }
-                setThink(thinkMatch.replace("<think>", "").trim());
-                contentThink += chunk;
-                return read();
-              }
-            }
 
             contentResponse += chunk;
 
@@ -291,8 +266,8 @@ export function AskAI({
   }, [html]);
 
   return (
-    <div className="px-3">
-      <div className="relative bg-neutral-800 border border-neutral-700 rounded-2xl ring-[4px] focus-within:ring-neutral-500/30 focus-within:border-neutral-600 ring-transparent z-10 w-full group">
+    <div className="px-4 pb-4">
+      <div className="relative bg-neutral-900/80 backdrop-blur-sm border border-neutral-700/50 rounded-xl ring-2 focus-within:ring-[#D4AF37]/30 focus-within:border-[#D4AF37]/50 ring-transparent transition-all duration-200 w-full group shadow-lg">
         {think && (
           <div className="w-full border-b border-neutral-700 relative overflow-hidden">
             <header
@@ -302,7 +277,7 @@ export function AskAI({
               }}
             >
               <p className="text-sm font-medium text-neutral-300 group-hover:text-neutral-200 transition-colors duration-200">
-                {isThinking ? "DeepSite is thinking..." : "DeepSite's plan"}
+                {isThinking ? "[MY BRAND NAME] is thinking..." : "[MY BRAND NAME]'s plan"}
               </p>
               <ChevronDown
                 className={classNames(
@@ -368,10 +343,10 @@ export function AskAI({
             )}
             placeholder={
               selectedElement
-                ? `Ask DeepSite about ${selectedElement.tagName.toLowerCase()}...`
+                ? `Ask [MY BRAND NAME] about ${selectedElement.tagName.toLowerCase()}...`
                 : hasAsked
-                ? "Ask DeepSite for edits"
-                : "Ask DeepSite anything..."
+                ? "Ask [MY BRAND NAME] for edits"
+                : "Ask Celestiq AI anything..."
             }
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
@@ -412,7 +387,6 @@ export function AskAI({
                 </TooltipContent>
               </Tooltip>
             )}
-            <InviteFriends />
           </div>
           <div className="flex items-center justify-end gap-2">
             <Settings
@@ -450,9 +424,6 @@ export function AskAI({
                 id="diff-patch-checkbox"
                 checked={isFollowUp}
                 onCheckedChange={(e) => {
-                  if (e === true && !isSameHtml && selectedModel?.isThinker) {
-                    setModel(MODELS[0].value);
-                  }
                   setIsFollowUp(e === true);
                 }}
               />

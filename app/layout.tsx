@@ -9,7 +9,6 @@ import { Toaster } from "@/components/ui/sonner";
 import MY_TOKEN_KEY from "@/lib/get-cookie-name";
 import { apiServer } from "@/lib/api";
 import AppContext from "@/components/contexts/app-context";
-import Script from "next/script";
 
 const inter = Inter({
   variable: "--font-inter-sans",
@@ -23,40 +22,40 @@ const ptSans = PT_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "DeepSite | Build with AI ✨",
+  title: "Celestiq AI | Build with AI ✨",
   description:
-    "DeepSite is a web development tool that helps you build websites with AI, no code required. Let's deploy your website with DeepSite and enjoy the magic of AI.",
+    "Celestiq AI is a web development tool that helps you build websites with AI, no code required. Let's deploy your website with Celestiq AI and enjoy the magic of AI.",
   openGraph: {
-    title: "DeepSite | Build with AI ✨",
+    title: "Celestiq AI | Build with AI ✨",
     description:
-      "DeepSite is a web development tool that helps you build websites with AI, no code required. Let's deploy your website with DeepSite and enjoy the magic of AI.",
-    url: "https://deepsite.hf.co",
-    siteName: "DeepSite",
+      "Celestiq AI is a web development tool that helps you build websites with AI, no code required. Let's deploy your website with Celestiq AI and enjoy the magic of AI.",
+    url: "https://celestiq-ai.com",
+    siteName: "Celestiq AI",
     images: [
       {
-        url: "https://deepsite.hf.co/banner.png",
+  url: "/favicon.svg",
         width: 1200,
         height: 630,
-        alt: "DeepSite Open Graph Image",
+        alt: "Celestiq AI Open Graph Image",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "DeepSite | Build with AI ✨",
+    title: "Celestiq AI | Build with AI ✨",
     description:
-      "DeepSite is a web development tool that helps you build websites with AI, no code required. Let's deploy your website with DeepSite and enjoy the magic of AI.",
-    images: ["https://deepsite.hf.co/banner.png"],
+      "Celestiq AI is a web development tool that helps you build websites with AI, no code required. Let's deploy your website with Celestiq AI and enjoy the magic of AI.",
+  images: ["/favicon.svg"],
   },
   appleWebApp: {
     capable: true,
-    title: "DeepSite",
+    title: "Celestiq AI",
     statusBarStyle: "black-translucent",
   },
   icons: {
-    icon: "/logo.svg",
-    shortcut: "/logo.svg",
-    apple: "/logo.svg",
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
   },
 };
 
@@ -90,18 +89,11 @@ export default async function RootLayout({
   const data = await getMe();
   return (
     <html lang="en">
-      <Script
-        defer
-        data-domain="deepsite.hf.co"
-        src="https://plausible.io/js/script.js"
-      ></Script>
-      <body
-        className={`${inter.variable} ${ptSans.variable} antialiased bg-black dark h-[100dvh] overflow-hidden`}
-      >
-        <Toaster richColors position="bottom-center" />
+      <body className={`min-h-screen antialiased bg-black ${inter.variable} ${ptSans.variable}`}>
         <TanstackProvider>
           <AppContext me={data}>{children}</AppContext>
         </TanstackProvider>
+        <Toaster richColors position="bottom-center" />
       </body>
     </html>
   );

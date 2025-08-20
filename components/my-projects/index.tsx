@@ -7,7 +7,6 @@ import { useUser } from "@/hooks/useUser";
 import { Project } from "@/types";
 import { redirect } from "next/navigation";
 import { ProjectCard } from "./project-card";
-import { LoadProject } from "./load-project";
 
 export function MyProjects({
   projects: initialProjects,
@@ -18,7 +17,7 @@ export function MyProjects({
   if (!user) {
     redirect("/");
   }
-  const [projects, setProjects] = useState<Project[]>(initialProjects || []);
+  const [projects] = useState<Project[]>(initialProjects || []);
   return (
     <>
       <section className="max-w-[86rem] py-12 px-4 mx-auto">
@@ -32,12 +31,6 @@ export function MyProjects({
               Create, manage, and explore your DeepSite projects.
             </p>
           </div>
-          <LoadProject
-            fullXsBtn
-            onSuccess={(project: Project) => {
-              setProjects((prev) => [...prev, project]);
-            }}
-          />
         </header>
         <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           <Link

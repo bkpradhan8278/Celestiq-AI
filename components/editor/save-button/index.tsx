@@ -55,20 +55,30 @@ export function SaveButton({
     <>
       <Button
         variant="default"
-        className="max-lg:hidden !px-4 relative"
+        className="max-lg:hidden bg-[#D4AF37] hover:bg-[#D4AF37]/80 text-black font-medium px-3 py-2 rounded-lg transition-all duration-200"
         onClick={updateSpace}
+        disabled={loading}
       >
-        <MdSave className="size-4" />
-        Deploy your Project{" "}
-        {loading && <Loading className="ml-2 size-4 animate-spin" />}
+        {loading ? (
+          <Loading className="size-4 animate-spin" />
+        ) : (
+          <MdSave className="size-4" />
+        )}
+        <span className="ml-2">Save</span>
       </Button>
       <Button
         variant="default"
         size="sm"
-        className="lg:hidden relative"
+        className="lg:hidden bg-[#D4AF37] hover:bg-[#D4AF37]/80 text-black font-medium px-3 py-2 rounded-lg"
         onClick={updateSpace}
+        disabled={loading}
       >
-        Deploy {loading && <Loading className="ml-2 size-4 animate-spin" />}
+        {loading ? (
+          <Loading className="size-3 animate-spin" />
+        ) : (
+          <MdSave className="size-3" />
+        )}
+        <span className="ml-1 text-sm">Save</span>
       </Button>
     </>
   );

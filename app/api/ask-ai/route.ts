@@ -85,11 +85,23 @@ export async function POST(request: NextRequest) {
     billTo = "huggingface";
   }
 
-  const DEFAULT_PROVIDER = PROVIDERS.novita;
+  const DEFAULT_PROVIDER = PROVIDERS.groq;
   const selectedProvider =
     provider === "auto"
       ? PROVIDERS[selectedModel.autoProvider as keyof typeof PROVIDERS]
       : PROVIDERS[provider as keyof typeof PROVIDERS] ?? DEFAULT_PROVIDER;
+
+  // Extract the actual model name for API calls (remove provider prefix if present)
+  const getActualModelName = (modelValue: string) => {
+    // If the model has a provider prefix like "hyperbolic/meta-llama/...", extract the actual model name
+    if (modelValue.includes('/') && !modelValue.startsWith('meta-llama/') && !modelValue.startsWith('mistralai/') && !modelValue.startsWith('accounts/')) {
+      const parts = modelValue.split('/');
+      return parts.slice(1).join('/'); // Remove the provider prefix
+    }
+    return modelValue;
+  };
+
+  const actualModelName = getActualModelName(selectedModel.value);
 
   try {
     // Create a stream response
@@ -112,7 +124,7 @@ export async function POST(request: NextRequest) {
         const client = new InferenceClient(token);
         const chatCompletion = client.chatCompletionStream(
           {
-            model: selectedModel.value,
+            model: actualModelName,
             provider: selectedProvider.id as any,
             messages: [
               {
@@ -141,38 +153,11 @@ export async function POST(request: NextRequest) {
 
           const chunk = value.choices[0]?.delta?.content;
           if (chunk) {
-            let newChunk = chunk;
-            if (!selectedModel?.isThinker) {
-              if (provider !== "sambanova") {
-                await writer.write(encoder.encode(chunk));
-                completeResponse += chunk;
+            await writer.write(encoder.encode(chunk));
+            completeResponse += chunk;
 
-                if (completeResponse.includes("</html>")) {
-                  break;
-                }
-              } else {
-                if (chunk.includes("</html>")) {
-                  newChunk = newChunk.replace(/<\/html>[\s\S]*/, "</html>");
-                }
-                completeResponse += newChunk;
-                await writer.write(encoder.encode(newChunk));
-                if (newChunk.includes("</html>")) {
-                  break;
-                }
-              }
-            } else {
-              const lastThinkTagIndex =
-                completeResponse.lastIndexOf("</think>");
-              completeResponse += newChunk;
-              await writer.write(encoder.encode(newChunk));
-              if (lastThinkTagIndex !== -1) {
-                const afterLastThinkTag = completeResponse.slice(
-                  lastThinkTagIndex + "</think>".length
-                );
-                if (afterLastThinkTag.includes("</html>")) {
-                  break;
-                }
-              }
+            if (completeResponse.includes("</html>")) {
+              break;
             }
           }
         }
@@ -278,16 +263,28 @@ export async function PUT(request: NextRequest) {
 
   const client = new InferenceClient(token);
 
-  const DEFAULT_PROVIDER = PROVIDERS.novita;
+  const DEFAULT_PROVIDER = PROVIDERS.groq;
   const selectedProvider =
     provider === "auto"
       ? PROVIDERS[selectedModel.autoProvider as keyof typeof PROVIDERS]
       : PROVIDERS[provider as keyof typeof PROVIDERS] ?? DEFAULT_PROVIDER;
 
+  // Extract the actual model name for API calls (remove provider prefix if present)
+  const getActualModelName = (modelValue: string) => {
+    // If the model has a provider prefix like "hyperbolic/meta-llama/...", extract the actual model name
+    if (modelValue.includes('/') && !modelValue.startsWith('meta-llama/') && !modelValue.startsWith('mistralai/') && !modelValue.startsWith('accounts/')) {
+      const parts = modelValue.split('/');
+      return parts.slice(1).join('/'); // Remove the provider prefix
+    }
+    return modelValue;
+  };
+
+  const actualModelName = getActualModelName(selectedModel.value);
+
   try {
     const response = await client.chatCompletion(
       {
-        model: selectedModel.value,
+        model: actualModelName,
         provider: selectedProvider.id as any,
         messages: [
           {
@@ -314,11 +311,7 @@ export async function PUT(request: NextRequest) {
             content: prompt,
           },
         ],
-        ...(selectedProvider.id !== "sambanova"
-          ? {
-              max_tokens: selectedProvider.max_tokens,
-            }
-          : {}),
+        max_tokens: selectedProvider.max_tokens,
       },
       billTo ? { billTo } : {}
     );

@@ -1,13 +1,11 @@
 "use client";
 
 import { useRef, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useMount, useUnmount } from "react-use";
 import classNames from "classnames";
 
 import { Button } from "@/components/ui/button";
-import Logo from "@/assets/logo.svg";
 import { useUser } from "@/hooks/useUser";
 import { UserMenu } from "@/components/user-menu";
 
@@ -87,14 +85,14 @@ export default function Navigation() {
     >
       <nav className="grid grid-cols-2 p-4 container mx-auto">
         <Link href="/" className="flex items-center gap-1">
-          <Image
-            src={Logo}
-            className="w-9 mr-1"
-            alt="DeepSite Logo"
-            width={64}
-            height={64}
-          />
-          <p className="font-sans text-white text-xl font-bold">DeepSite</p>
+          <div className="flex flex-col">
+            <p className="font-sans text-white text-xl font-bold leading-tight flex items-center gap-1">
+              🔆 Celestiq AI
+            </p>
+            <span className="text-[10px] text-gray-500 font-normal mt-1 ml-6">
+              @ Powered by Tapu AI
+            </span>
+          </div>
         </Link>
         <ul className="items-center justify-center gap-6 hidden">
           {navigationLinks.map((link) => (

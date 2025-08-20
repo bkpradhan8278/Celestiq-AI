@@ -1,6 +1,8 @@
 {
-  "name": "deepsite-v2",
+  "name": "celestiq-ai",
   "version": "0.1.0",
+  "description": "A futuristic AI-powered website builder with stunning wormhole visual effects",
+  "author": "Bikram Pradhan",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
@@ -9,8 +11,8 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@huggingface/hub": "^2.2.0",
-    "@huggingface/inference": "^4.0.3",
+    "@huggingface/hub": "^2.4.1",
+    "@huggingface/inference": "^4.7.1",
     "@monaco-editor/react": "^4.7.0-rc.0",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-checkbox": "^1.3.2",
