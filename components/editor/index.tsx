@@ -15,14 +15,12 @@ import {
 import classNames from "classnames";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { Button } from "@/components/ui/button";
 import { Header } from "@/components/editor/header";
 import { Footer } from "@/components/editor/footer";
 import { defaultHTML } from "@/lib/consts";
 import { Preview } from "@/components/editor/preview";
 import { useEditor } from "@/hooks/useEditor";
 import { AskAI } from "@/components/editor/ask-ai";
-import { DeployButton } from "./deploy-button";
 import { Project } from "@/types";
 import { SaveButton } from "./save-button";
 import { isTheSameHtml } from "@/lib/compare-html-diff";
@@ -328,7 +326,6 @@ export const AppEditor = ({ project }: { project?: Project | null }) => {
         iframeRef={iframeRef}
         device={device}
         setDevice={setDevice}
-        currentTab={currentTab}
         onTabChange={setCurrentTab}
       />
     </section>

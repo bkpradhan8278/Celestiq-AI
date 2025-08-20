@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { MdDownload } from "react-icons/md";
-import { useParams } from "next/navigation";
 
 import Loading from "@/components/loading";
 import { Button } from "@/components/ui/button";

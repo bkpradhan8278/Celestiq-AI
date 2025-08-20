@@ -27,7 +27,6 @@ export function Footer({
   device,
   setDevice,
   iframeRef,
-  currentTab,
   onTabChange,
 }: {
   onReset: () => void;
@@ -36,7 +35,6 @@ export function Footer({
   setHtml: (html: string) => void;
   iframeRef?: React.RefObject<HTMLIFrameElement | null>;
   setDevice: React.Dispatch<React.SetStateAction<"desktop" | "mobile">>;
-  currentTab?: string;
   onTabChange?: (tab: string) => void;
 }) {
   const { user } = useUser();
