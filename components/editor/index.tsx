@@ -241,10 +241,26 @@ export const AppEditor = ({ project }: { project?: Project | null }) => {
                   });
                   setHtmlHistory(currentHistory);
                   setSelectedElement(null);
-                  // if xs or sm
-                  if (window.innerWidth <= 1024) {
+                  
+                  // Fast mobile preview switch - detect mobile and switch immediately
+                  const isMobile = window.innerWidth < 768;
+                  const isTablet = window.innerWidth >= 768 && window.innerWidth <= 1024;
+                  
+                  if (isMobile) {
+                    // For mobile phones - switch immediately for fast preview
                     setCurrentTab("preview");
+                    // Optional: Add a brief success indicator
+                    setTimeout(() => {
+                      toast.success("🚀 Preview ready!", { duration: 1500 });
+                    }, 100);
+                  } else if (isTablet) {
+                    // For tablets - small delay to see the completion
+                    setTimeout(() => {
+                      setCurrentTab("preview");
+                    }, 300);
                   }
+                  // Desktop users stay on current tab (chat) to see the code
+                  
                   if (updatedLines && updatedLines?.length > 0) {
                     const decorations = updatedLines.map((line) => ({
                       range: new monacoRef.current.Range(
