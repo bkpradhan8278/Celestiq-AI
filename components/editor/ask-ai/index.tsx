@@ -9,7 +9,6 @@ import { FaStopCircle } from "react-icons/fa";
 
 import ProModal from "@/components/pro-modal";
 import { Button } from "@/components/ui/button";
-import { MODELS } from "@/lib/providers";
 import { HtmlHistory } from "@/types";
 import { Settings } from "@/components/editor/ask-ai/settings";
 import { LoginModal } from "@/components/login-modal";
