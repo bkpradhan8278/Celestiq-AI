@@ -14,6 +14,7 @@ import {
   SEARCH_START,
 } from "@/lib/prompts";
 import MY_TOKEN_KEY from "@/lib/get-cookie-name";
+import { GeminiClient, shouldUseDirectGeminiAPI } from "@/lib/gemini-client";
 
 const ipAddresses = new Map();
 
@@ -158,11 +159,13 @@ export async function POST(request: NextRequest) {
     (async () => {
       let completeResponse = "";
       try {
-        const client = new InferenceClient(token);
-        const chatCompletion = client.chatCompletionStream(
-          {
-            model: actualModelName,
-            provider: selectedProvider.id as any,
+        // Check if we should use direct Gemini API
+        if (shouldUseDirectGeminiAPI(smartModel) && process.env.GOOGLE_API_KEY) {
+          console.log(`🔗 Using direct Gemini API for ${smartModel}`);
+          const geminiClient = new GeminiClient(process.env.GOOGLE_API_KEY);
+          
+          const chatCompletion = geminiClient.streamChatCompletion({
+            model: smartModel,
             messages: [
               {
                 role: "system",
@@ -178,23 +181,60 @@ export async function POST(request: NextRequest) {
               },
             ],
             max_tokens: selectedProvider.max_tokens,
-          },
-          billTo ? { billTo } : {}
-        );
+          });
 
-        while (true) {
-          const { done, value } = await chatCompletion.next();
-          if (done) {
-            break;
+          for await (const chunk of chatCompletion) {
+            const content = chunk.choices[0]?.delta?.content;
+            if (content) {
+              await writer.write(encoder.encode(content));
+              completeResponse += content;
+
+              if (completeResponse.includes("</html>")) {
+                break;
+              }
+            }
           }
+        } else {
+          // Fallback to HuggingFace API
+          console.log(`🔗 Using HuggingFace API for ${smartModel}`);
+          const client = new InferenceClient(token);
+          const chatCompletion = client.chatCompletionStream(
+            {
+              model: actualModelName,
+              provider: selectedProvider.id as any,
+              messages: [
+                {
+                  role: "system",
+                  content: INITIAL_SYSTEM_PROMPT,
+                },
+                {
+                  role: "user",
+                  content: redesignMarkdown
+                    ? `Here is my current design as a markdown:\n\n${redesignMarkdown}\n\nNow, please create a new design based on this markdown.`
+                    : html
+                    ? `Here is my current HTML code:\n\n\`\`\`html\n${html}\n\`\`\`\n\nNow, please create a new design based on this HTML.`
+                    : prompt,
+                },
+              ],
+              max_tokens: selectedProvider.max_tokens,
+            },
+            billTo ? { billTo } : {}
+          );
 
-          const chunk = value.choices[0]?.delta?.content;
-          if (chunk) {
-            await writer.write(encoder.encode(chunk));
-            completeResponse += chunk;
-
-            if (completeResponse.includes("</html>")) {
+          while (true) {
+            const { done, value } = await chatCompletion.next();
+            if (done) {
               break;
+            }
+
+            const chunk = value.choices[0]?.delta?.content;
+            if (chunk) {
+              await writer.write(encoder.encode(chunk));
+              completeResponse += chunk;
+
+              if (completeResponse.includes("</html>")) {
+                break;
+              }
             }
           }
         }
@@ -334,8 +374,6 @@ export async function PUT(request: NextRequest) {
     billTo = "huggingface";
   }
 
-  const client = new InferenceClient(token);
-
   const DEFAULT_PROVIDER = PROVIDERS.groq;
   const selectedProvider =
     provider === "auto"
@@ -355,10 +393,15 @@ export async function PUT(request: NextRequest) {
   const actualModelName = getActualModelName(selectedModel.value);
 
   try {
-    const response = await client.chatCompletion(
-      {
-        model: actualModelName,
-        provider: selectedProvider.id as any,
+    // Check if we should use direct Gemini API for follow-up requests
+    let response;
+    
+    if (shouldUseDirectGeminiAPI(smartModel) && process.env.GOOGLE_API_KEY) {
+      console.log(`🔗 Using direct Gemini API for follow-up: ${smartModel}`);
+      const geminiClient = new GeminiClient(process.env.GOOGLE_API_KEY);
+      
+      response = await geminiClient.chatCompletion({
+        model: smartModel,
         messages: [
           {
             role: "system",
@@ -372,7 +415,6 @@ export async function PUT(request: NextRequest) {
           },
           {
             role: "assistant",
-
             content: `The current code is: \n\`\`\`html\n${html}\n\`\`\` ${
               selectedElementHtml
                 ? `\n\nYou have to update ONLY the following element, NOTHING ELSE: \n\n\`\`\`html\n${selectedElementHtml}\n\`\`\``
@@ -385,9 +427,46 @@ export async function PUT(request: NextRequest) {
           },
         ],
         max_tokens: selectedProvider.max_tokens,
-      },
-      billTo ? { billTo } : {}
-    );
+      });
+    } else {
+      // Fallback to HuggingFace API
+      console.log(`🔗 Using HuggingFace API for follow-up: ${smartModel}`);
+      const client = new InferenceClient(token);
+      
+      response = await client.chatCompletion(
+        {
+          model: actualModelName,
+          provider: selectedProvider.id as any,
+          messages: [
+            {
+              role: "system",
+              content: FOLLOW_UP_SYSTEM_PROMPT,
+            },
+            {
+              role: "user",
+              content: previousPrompt
+                ? previousPrompt
+                : "You are modifying the HTML file based on the user's request.",
+            },
+            {
+              role: "assistant",
+
+              content: `The current code is: \n\`\`\`html\n${html}\n\`\`\` ${
+                selectedElementHtml
+                  ? `\n\nYou have to update ONLY the following element, NOTHING ELSE: \n\n\`\`\`html\n${selectedElementHtml}\n\`\`\``
+                  : ""
+              }`,
+            },
+            {
+              role: "user",
+              content: prompt,
+            },
+          ],
+          max_tokens: selectedProvider.max_tokens,
+        },
+        billTo ? { billTo } : {}
+      );
+    }
 
     const chunk = response.choices[0]?.message?.content;
     if (!chunk) {

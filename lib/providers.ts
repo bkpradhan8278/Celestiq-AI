@@ -83,6 +83,12 @@ export const PROVIDERS = {
     id: "groq",
     baseUrl: "https://api.groq.com/openai/v1",
   },
+  "google": {
+    name: "Google AI",
+    max_tokens: 1_000_000,
+    id: "google",
+    baseUrl: "https://generativelanguage.googleapis.com/v1beta",
+  },
 };
 
 export const MODELS = [
@@ -281,5 +287,35 @@ export const MODELS = [
     providers: ["perplexity"],
     autoProvider: "perplexity",
     description: "Advanced web search + LLM",
+  },
+  
+  // Google Gemini Models
+  {
+    value: "google/gemini-2.5-flash-lite",
+    label: "Gemini 2.5 Flash Lite",
+    providers: ["google", "huggingface"],
+    autoProvider: "google",
+    description: "Fast and efficient Gemini model",
+  },
+  {
+    value: "google/gemini-2.5-flash",
+    label: "Gemini 2.5 Flash",
+    providers: ["google", "huggingface"],
+    autoProvider: "google",
+    description: "Powerful Gemini model for complex tasks",
+  },
+  {
+    value: "google/gemma-2-3b-it",
+    label: "Gemma 2 3B Instruct",
+    providers: ["google", "huggingface"],
+    autoProvider: "google",
+    description: "Open-source Google model",
+  },
+  {
+    value: "google/gemma-2-9b-it",
+    label: "Gemma 2 9B Instruct",
+    providers: ["google", "huggingface"],
+    autoProvider: "google",
+    description: "Larger open-source Google model",
   },
 ];
