@@ -64,6 +64,8 @@ export function AskAI({
   const [isThinking, setIsThinking] = useState(true);
   const [controller, setController] = useState<AbortController | null>(null);
   const [isFollowUp, setIsFollowUp] = useState(true);
+  const [streamingResponse, setStreamingResponse] = useState("");
+  const [messages, setMessages] = useState<{id: string, role: 'user' | 'assistant', content: string, timestamp: number}[]>([]);
 
   const callAi = async (redesignMarkdown?: string) => {
     if (isAiWorking) return;
@@ -73,6 +75,16 @@ export function AskAI({
     setThink("");
     setOpenThink(false);
     setIsThinking(true);
+    setStreamingResponse("");
+
+    // Add user message to conversation
+    const userMessage = {
+      id: Date.now().toString(),
+      role: 'user' as const,
+      content: redesignMarkdown || prompt,
+      timestamp: Date.now()
+    };
+    setMessages(prev => [...prev, userMessage]);
 
     let contentResponse = "";
     let lastRenderTime = 0;
@@ -173,6 +185,16 @@ export function AskAI({
               setHasAsked(true);
               if (audio.current) audio.current.play();
 
+              // Add AI message to conversation
+              const aiMessage = {
+                id: Date.now().toString(),
+                role: 'assistant' as const,
+                content: contentResponse,
+                timestamp: Date.now()
+              };
+              setMessages(prev => [...prev, aiMessage]);
+              setStreamingResponse("");
+
               // Now we have the complete HTML including </html>, so set it to be sure
               const finalDoc = contentResponse.match(
                 /<!DOCTYPE html>[\s\S]*<\/html>/
@@ -188,6 +210,9 @@ export function AskAI({
             const chunk = decoder.decode(value, { stream: true });
 
             contentResponse += chunk;
+            
+            // Update streaming response for chat display
+            setStreamingResponse(contentResponse);
 
             const newHtml = contentResponse.match(
               /<!DOCTYPE html>[\s\S]*/
@@ -313,6 +338,71 @@ export function AskAI({
             />
           </div>
         )}
+        
+        {/* Chat Interface */}
+        <div className="flex-1 overflow-hidden flex flex-col">
+          {messages.length > 0 && (
+            <div className="flex-1 overflow-y-auto px-4 py-2 space-y-4 max-h-[400px]">
+              {messages.map((message) => (
+                <div key={message.id} className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className={classNames(
+                      "w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium",
+                      {
+                        "bg-blue-500 text-white": message.role === 'user',
+                        "bg-gradient-to-r from-purple-500 to-blue-600 text-white": message.role === 'assistant'
+                      }
+                    )}>
+                      {message.role === 'user' ? 'U' : '🤖'}
+                    </div>
+                    <span className="text-xs text-neutral-400">
+                      {message.role === 'user' ? 'You' : 'Tapu AI'}
+                    </span>
+                    <span className="text-xs text-neutral-500">
+                      {new Date(message.timestamp).toLocaleTimeString()}
+                    </span>
+                  </div>
+                  <div className={classNames(
+                    "rounded-lg p-3 text-sm",
+                    {
+                      "bg-neutral-700 text-neutral-200 ml-8": message.role === 'user',
+                      "bg-gradient-to-r from-neutral-800 to-neutral-750 text-neutral-100 border border-neutral-600": message.role === 'assistant'
+                    }
+                  )}>
+                    {message.role === 'assistant' ? (
+                      <pre className="whitespace-pre-wrap font-mono text-xs overflow-x-auto">
+                        <code>{message.content}</code>
+                      </pre>
+                    ) : (
+                      <p>{message.content}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+              
+              {/* Streaming Response */}
+              {isAiWorking && streamingResponse && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-full bg-gradient-to-r from-purple-500 to-blue-600 flex items-center justify-center text-xs text-white">
+                      🤖
+                    </div>
+                    <span className="text-xs text-neutral-400">Tapu AI</span>
+                    <span className="text-xs text-green-400 flex items-center gap-1">
+                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                      Writing...
+                    </span>
+                  </div>
+                  <div className="bg-gradient-to-r from-neutral-800 to-neutral-750 text-neutral-100 border border-neutral-600 rounded-lg p-3">
+                    <pre className="whitespace-pre-wrap font-mono text-xs overflow-x-auto">
+                      <code>{streamingResponse}</code>
+                    </pre>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
         <div className="w-full relative flex items-center justify-between">
           {isAiWorking && (
             <div className="absolute bg-neutral-800 rounded-lg bottom-0 left-4 w-[calc(100%-30px)] h-full z-1 flex items-center justify-between max-lg:text-sm">
