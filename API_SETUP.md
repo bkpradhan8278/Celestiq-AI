@@ -14,7 +14,8 @@
 1. **Open** the `.env.local` file in your project root
 2. **Replace** `your_google_gemini_api_key_here` with your actual API key:
    ```
-   GOOGLE_API_KEY=AIzaSyBxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   # Example:
+# google_api_key=AIzaSyBxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
    ```
 3. **Save** the file
 4. **Restart** your development server
@@ -52,7 +53,7 @@ Perfect for development and moderate usage!
 
 ```env
 # Required for Gemini API
-GOOGLE_API_KEY=your_google_gemini_api_key_here
+google_api_key=your_google_gemini_api_key_here
 
 # Optional: HuggingFace fallback
 HF_TOKEN=your_huggingface_token_here

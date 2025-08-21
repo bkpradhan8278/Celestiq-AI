@@ -16,6 +16,17 @@ import {
 import MY_TOKEN_KEY from "@/lib/get-cookie-name";
 import { GeminiClient, shouldUseDirectGeminiAPI } from "@/lib/gemini-client";
 
+// Helper function to map Google models to HuggingFace equivalents
+const mapGoogleModelForHF = (modelValue: string): string => {
+  const googleModelMap: Record<string, string> = {
+    'google/gemini-2.5-flash-lite': 'google/gemma-2b-it',
+    'google/gemini-2.5-flash': 'google/gemma-7b-it', 
+    'google/gemma-2-3b-it': 'google/gemma-2b-it',
+    'google/gemma-2-9b-it': 'google/gemma-7b-it',
+  };
+  return googleModelMap[modelValue] || 'google/gemma-2b-it';
+};
+
 const ipAddresses = new Map();
 
 export async function POST(request: NextRequest) {
@@ -160,9 +171,9 @@ export async function POST(request: NextRequest) {
       let completeResponse = "";
       try {
         // Check if we should use direct Gemini API
-        if (shouldUseDirectGeminiAPI(smartModel) && process.env.GOOGLE_API_KEY) {
+        if (shouldUseDirectGeminiAPI(smartModel) && process.env.google_api_key) {
           console.log(`🔗 Using direct Gemini API for ${smartModel}`);
-          const geminiClient = new GeminiClient(process.env.GOOGLE_API_KEY);
+          const geminiClient = new GeminiClient(process.env.google_api_key);
           
           const chatCompletion = geminiClient.streamChatCompletion({
             model: smartModel,
@@ -396,9 +407,9 @@ export async function PUT(request: NextRequest) {
     // Check if we should use direct Gemini API for follow-up requests
     let response;
     
-    if (shouldUseDirectGeminiAPI(smartModel) && process.env.GOOGLE_API_KEY) {
+    if (shouldUseDirectGeminiAPI(smartModel) && process.env.google_api_key) {
       console.log(`🔗 Using direct Gemini API for follow-up: ${smartModel}`);
-      const geminiClient = new GeminiClient(process.env.GOOGLE_API_KEY);
+      const geminiClient = new GeminiClient(process.env.google_api_key);
       
       response = await geminiClient.chatCompletion({
         model: smartModel,

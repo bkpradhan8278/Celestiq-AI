@@ -182,7 +182,7 @@ export class GeminiClient {
  * Check if we should use direct Gemini API or fallback to HuggingFace
  */
 export function shouldUseDirectGeminiAPI(model: string): boolean {
-  return !!(process.env.GOOGLE_API_KEY && 
-         process.env.GOOGLE_API_KEY.length > 0 && 
+  return !!(process.env.google_api_key && 
+         process.env.google_api_key.length > 0 && 
          model.startsWith('google/'));
 }
