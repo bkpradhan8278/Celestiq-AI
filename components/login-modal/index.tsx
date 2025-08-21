@@ -8,8 +8,8 @@ export const LoginModal = ({
   open,
   html,
   onClose,
-  title = "Log In to use DeepSite for free",
-  description = "Log In through your Hugging Face account to continue using DeepSite and increase your monthly free limit.",
+  title = "Log In to use App Builder for free",
+  description = "Log In through your account to continue using App Builder and increase your monthly free limit.",
 }: {
   open: boolean;
   html?: string;

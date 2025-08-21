@@ -120,18 +120,14 @@ export async function POST(request: NextRequest) {
     ? authHeaders.get("x-forwarded-for")?.split(",")[1].trim()
     : authHeaders.get("x-forwarded-for");
 
-  // Check if Google API is available for unlimited usage
-  const hasGoogleAPI = !!(process.env.google_api_key && process.env.google_api_key.length > 0);
-  const isGoogleModel = smartModel.includes('google/gemini') || smartModel.includes('google/gemma');
-
-  if (!token && !(hasGoogleAPI && isGoogleModel)) {
+  if (!token) {
     ipAddresses.set(ip, (ipAddresses.get(ip) || 0) + 1);
     if (ipAddresses.get(ip) > MAX_REQUESTS_PER_IP) {
       return NextResponse.json(
         {
           ok: false,
           openLogin: true,
-          message: "Upgrade your account to continue using the service",
+          message: "Log In to continue using the service",
         },
         { status: 429 }
       );
@@ -139,8 +135,6 @@ export async function POST(request: NextRequest) {
 
     token = process.env.DEFAULT_HF_TOKEN as string;
     billTo = "huggingface";
-  } else if (hasGoogleAPI && isGoogleModel) {
-    billTo = "google";
   }
 
   const DEFAULT_PROVIDER = PROVIDERS.groq;
@@ -391,18 +385,14 @@ export async function PUT(request: NextRequest) {
     ? authHeaders.get("x-forwarded-for")?.split(",")[1].trim()
     : authHeaders.get("x-forwarded-for");
 
-  // Check if Google API is available for unlimited usage (PUT function)
-  const hasGoogleAPI = !!(process.env.google_api_key && process.env.google_api_key.length > 0);
-  const isGoogleModel = smartModel.includes('google/gemini') || smartModel.includes('google/gemma');
-
-  if (!token && !(hasGoogleAPI && isGoogleModel)) {
+  if (!token) {
     ipAddresses.set(ip, (ipAddresses.get(ip) || 0) + 1);
     if (ipAddresses.get(ip) > MAX_REQUESTS_PER_IP) {
       return NextResponse.json(
         {
           ok: false,
           openLogin: true,
-          message: "Upgrade your account to continue using the service",
+          message: "Log In to continue using the service",
         },
         { status: 429 }
       );
@@ -410,8 +400,6 @@ export async function PUT(request: NextRequest) {
 
     token = process.env.DEFAULT_HF_TOKEN as string;
     billTo = "huggingface";
-  } else if (hasGoogleAPI && isGoogleModel) {
-    billTo = "google";
   }
 
   const DEFAULT_PROVIDER = PROVIDERS.groq;
