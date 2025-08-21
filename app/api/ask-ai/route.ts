@@ -16,17 +16,6 @@ import {
 import MY_TOKEN_KEY from "@/lib/get-cookie-name";
 import { GeminiClient, shouldUseDirectGeminiAPI } from "@/lib/gemini-client";
 
-// Helper function to map Google models to HuggingFace equivalents
-const mapGoogleModelForHF = (modelValue: string): string => {
-  const googleModelMap: Record<string, string> = {
-    'google/gemini-2.5-flash-lite': 'google/gemma-2b-it',
-    'google/gemini-2.5-flash': 'google/gemma-7b-it', 
-    'google/gemma-2-3b-it': 'google/gemma-2b-it',
-    'google/gemma-2-9b-it': 'google/gemma-7b-it',
-  };
-  return googleModelMap[modelValue] || 'google/gemma-2b-it';
-};
-
 const ipAddresses = new Map();
 
 export async function POST(request: NextRequest) {
@@ -68,16 +57,30 @@ export async function POST(request: NextRequest) {
       promptText.includes('fix')
     );
 
-    // Smart routing logic
-    if (isSimple) {
-      smartModel = 'google/gemma-2-3b-it'; // Fast for simple tasks
-    } else if (isComplex) {
-      smartModel = 'google/gemini-2.5-flash'; // Powerful for complex tasks
+    // Check if Google API is available
+    const hasGoogleAPI = !!(process.env.google_api_key && process.env.google_api_key.length > 0);
+    
+    if (hasGoogleAPI) {
+      // Smart routing with Google API
+      if (isSimple) {
+        smartModel = 'google/gemma-2-3b-it'; // Fast for simple tasks
+      } else if (isComplex) {
+        smartModel = 'google/gemini-2.5-flash'; // Powerful for complex tasks
+      } else {
+        smartModel = 'google/gemini-2.5-flash-lite'; // Balanced default
+      }
     } else {
-      smartModel = 'google/gemini-2.5-flash-lite'; // Balanced default
+      // Fallback to reliable HuggingFace models
+      if (isSimple) {
+        smartModel = 'google/gemma-2b-it'; // Small Gemma on HF
+      } else if (isComplex) {
+        smartModel = 'meta-llama/Llama-3.2-3B-Instruct'; // Powerful Llama
+      } else {
+        smartModel = 'google/gemma-2b-it'; // Default Gemma
+      }
     }
     
-    console.log(`🤖 Smart routing: "${prompt.substring(0, 50)}..." → ${smartModel}`);
+    console.log(`🤖 Smart routing: "${prompt.substring(0, 50)}..." → ${smartModel} (Google API: ${hasGoogleAPI})`);
   }
 
   const selectedModel = MODELS.find(
@@ -330,16 +333,30 @@ export async function PUT(request: NextRequest) {
       promptText.includes('fix')
     );
 
-    // Smart routing logic for follow-ups
-    if (isSimple) {
-      smartModel = 'google/gemma-2-3b-it'; // Fast for simple edits
-    } else if (isComplex) {
-      smartModel = 'google/gemini-2.5-flash'; // Powerful for complex changes
+    // Check if Google API is available
+    const hasGoogleAPI = !!(process.env.google_api_key && process.env.google_api_key.length > 0);
+    
+    if (hasGoogleAPI) {
+      // Smart routing with Google API
+      if (isSimple) {
+        smartModel = 'google/gemma-2-3b-it'; // Fast for simple edits
+      } else if (isComplex) {
+        smartModel = 'google/gemini-2.5-flash'; // Powerful for complex changes
+      } else {
+        smartModel = 'google/gemini-2.5-flash-lite'; // Balanced default
+      }
     } else {
-      smartModel = 'google/gemini-2.5-flash-lite'; // Balanced default
+      // Fallback to reliable HuggingFace models
+      if (isSimple) {
+        smartModel = 'google/gemma-2b-it'; // Small Gemma on HF
+      } else if (isComplex) {
+        smartModel = 'meta-llama/Llama-3.2-3B-Instruct'; // Powerful Llama
+      } else {
+        smartModel = 'google/gemma-2b-it'; // Default Gemma
+      }
     }
     
-    console.log(`🤖 Smart follow-up routing: "${prompt.substring(0, 50)}..." → ${smartModel}`);
+    console.log(`🤖 Smart follow-up routing: "${prompt.substring(0, 50)}..." → ${smartModel} (Google API: ${hasGoogleAPI})`);
   }
 
   const selectedModel = MODELS.find(
