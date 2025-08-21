@@ -80,17 +80,25 @@ export function Settings({
               </p>
             )}
             <label className="block">
-              <p className="text-neutral-300 text-sm mb-2.5">
-                Choose a DeepSeek model
+              <p className="text-neutral-300 text-sm mb-2.5 flex items-center gap-2">
+                🤖 Choose a Model
+                <span className="text-xs bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full px-2 py-0.5">
+                  Auto-Smart
+                </span>
               </p>
               <Select defaultValue={model} onValueChange={onModelChange}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a DeepSeek model" />
+                <SelectTrigger className="w-full bg-neutral-800 border-neutral-600 text-white hover:bg-neutral-700 transition-colors">
+                  <SelectValue placeholder="Select an AI model" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-neutral-800 border-neutral-600">
                   <SelectGroup>
-                    <SelectLabel>DeepSeek models</SelectLabel>
-                    {MODELS.map(
+                    <SelectLabel className="text-neutral-400 px-2 py-1.5 text-xs font-medium">
+                      🚀 Smart AI Models
+                    </SelectLabel>
+                    {MODELS.filter(m => 
+                      m.value.includes('gemini') || 
+                      m.value.includes('gemma')
+                    ).map(
                       ({
                         value,
                         label,
@@ -105,15 +113,29 @@ export function Settings({
                         <SelectItem
                           key={value}
                           value={value}
-                          className=""
+                          className="text-white hover:bg-neutral-700 focus:bg-neutral-700"
                           disabled={isThinker && isFollowUp}
                         >
-                          {label}
-                          {isNew && (
-                            <span className="text-xs bg-gradient-to-br from-sky-400 to-sky-600 text-white rounded-full px-1.5 py-0.5">
-                              New
-                            </span>
-                          )}
+                          <div className="flex items-center justify-between w-full">
+                            <span>{label}</span>
+                            <div className="flex gap-1">
+                              {value.includes('flash-lite') && (
+                                <span className="text-xs bg-green-500 text-white rounded-full px-1.5 py-0.5">
+                                  Default
+                                </span>
+                              )}
+                              {value.includes('gemma') && (
+                                <span className="text-xs bg-blue-500 text-white rounded-full px-1.5 py-0.5">
+                                  Free
+                                </span>
+                              )}
+                              {isNew && (
+                                <span className="text-xs bg-gradient-to-br from-sky-400 to-sky-600 text-white rounded-full px-1.5 py-0.5">
+                                  New
+                                </span>
+                              )}
+                            </div>
+                          </div>
                         </SelectItem>
                       )
                     )}

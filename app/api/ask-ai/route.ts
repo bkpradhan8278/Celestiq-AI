@@ -31,8 +31,45 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // 🤖 Smart Gemini Model Selection
+  // Auto-route to the best Gemini model based on prompt complexity
+  let smartModel = model;
+  
+  if (prompt && (model.includes('gemini') || model.includes('gemma'))) {
+    const promptText = prompt.toLowerCase();
+    const wordCount = prompt.split(' ').length;
+    const complexityIndicators = [
+      'animation', 'interactive', 'complex', 'advanced', 'dashboard', 
+      'chart', 'graph', 'database', 'api', 'responsive', 'mobile',
+      'framework', 'library', 'state management', 'routing'
+    ];
+    
+    const isComplex = complexityIndicators.some(indicator => 
+      promptText.includes(indicator)
+    ) || wordCount > 50;
+    
+    const isSimple = wordCount < 15 && (
+      promptText.includes('button') || 
+      promptText.includes('color') || 
+      promptText.includes('text') ||
+      promptText.includes('simple') ||
+      promptText.includes('fix')
+    );
+
+    // Smart routing logic
+    if (isSimple) {
+      smartModel = 'google/gemma-2-3b-it'; // Fast for simple tasks
+    } else if (isComplex) {
+      smartModel = 'google/gemini-2.5-flash'; // Powerful for complex tasks
+    } else {
+      smartModel = 'google/gemini-2.5-flash-lite'; // Balanced default
+    }
+    
+    console.log(`🤖 Smart routing: "${prompt.substring(0, 50)}..." → ${smartModel}`);
+  }
+
   const selectedModel = MODELS.find(
-    (m) => m.value === model || m.label === model
+    (m) => m.value === smartModel || m.label === smartModel
   );
   if (!selectedModel) {
     return NextResponse.json(
@@ -218,8 +255,44 @@ export async function PUT(request: NextRequest) {
     );
   }
 
+  // 🤖 Smart Gemini Model Selection for Follow-ups
+  let smartModel = model;
+  
+  if (prompt && (model.includes('gemini') || model.includes('gemma'))) {
+    const promptText = prompt.toLowerCase();
+    const wordCount = prompt.split(' ').length;
+    const complexityIndicators = [
+      'animation', 'interactive', 'complex', 'advanced', 'dashboard', 
+      'chart', 'graph', 'database', 'api', 'responsive', 'mobile',
+      'framework', 'library', 'state management', 'routing'
+    ];
+    
+    const isComplex = complexityIndicators.some(indicator => 
+      promptText.includes(indicator)
+    ) || wordCount > 50;
+    
+    const isSimple = wordCount < 15 && (
+      promptText.includes('button') || 
+      promptText.includes('color') || 
+      promptText.includes('text') ||
+      promptText.includes('simple') ||
+      promptText.includes('fix')
+    );
+
+    // Smart routing logic for follow-ups
+    if (isSimple) {
+      smartModel = 'google/gemma-2-3b-it'; // Fast for simple edits
+    } else if (isComplex) {
+      smartModel = 'google/gemini-2.5-flash'; // Powerful for complex changes
+    } else {
+      smartModel = 'google/gemini-2.5-flash-lite'; // Balanced default
+    }
+    
+    console.log(`🤖 Smart follow-up routing: "${prompt.substring(0, 50)}..." → ${smartModel}`);
+  }
+
   const selectedModel = MODELS.find(
-    (m) => m.value === model || m.label === model
+    (m) => m.value === smartModel || m.label === smartModel
   );
   if (!selectedModel) {
     return NextResponse.json(

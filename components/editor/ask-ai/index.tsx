@@ -56,7 +56,7 @@ export function AskAI({
   const [hasAsked, setHasAsked] = useState(false);
   const [previousPrompt, setPreviousPrompt] = useState("");
   const [provider, setProvider] = useLocalStorage("provider", "auto");
-  const [model, setModel] = useLocalStorage("model", MODELS[0].value);
+  const [model, setModel] = useLocalStorage("model", "google/gemini-2.5-flash-lite");
   const [openProvider, setOpenProvider] = useState(false);
   const [providerError, setProviderError] = useState("");
   const [openProModal, setOpenProModal] = useState(false);
