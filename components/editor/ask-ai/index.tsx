@@ -64,8 +64,7 @@ export function AskAI({
   const [isThinking, setIsThinking] = useState(true);
   const [controller, setController] = useState<AbortController | null>(null);
   const [isFollowUp, setIsFollowUp] = useState(true);
-  const [streamingResponse, setStreamingResponse] = useState("");
-  const [messages, setMessages] = useState<{id: string, role: 'user' | 'assistant', content: string, timestamp: number}[]>([]);
+  // Note: streamingResponse and messages removed as they were unused after chat removal
 
   const callAi = async (redesignMarkdown?: string) => {
     if (isAiWorking) return;
@@ -75,20 +74,10 @@ export function AskAI({
     setThink("");
     setOpenThink(false);
     setIsThinking(true);
-    setStreamingResponse("");
 
     console.log('🐛 DEBUG: Starting AI call with prompt:', prompt);
     console.log('🐛 DEBUG: Current HTML length:', html.length);
     console.log('🐛 DEBUG: Current HTML preview:', html.substring(0, 100) + '...');
-
-    // Add user message to conversation
-    const userMessage = {
-      id: Date.now().toString(),
-      role: 'user' as const,
-      content: redesignMarkdown || prompt,
-      timestamp: Date.now()
-    };
-    setMessages(prev => [...prev, userMessage]);
 
     let contentResponse = "";
     let lastRenderTime = 0;
@@ -188,10 +177,6 @@ export function AskAI({
               setisAiWorking(false);
               setHasAsked(true);
               if (audio.current) audio.current.play();
-
-              // Clear streaming response - don't add to chat messages
-              setStreamingResponse("");
-
               // Now we have the complete HTML including </html>, so set it to be sure
               const finalDoc = contentResponse.match(
                 /<!DOCTYPE html>[\s\S]*<\/html>/
@@ -234,9 +219,6 @@ export function AskAI({
             const chunk = decoder.decode(value, { stream: true });
 
             contentResponse += chunk;
-            
-            // Don't update streaming response for chat display - only show in editor
-            // setStreamingResponse(contentResponse);
 
             const newHtml = contentResponse.match(
               /<!DOCTYPE html>[\s\S]*/
@@ -269,7 +251,7 @@ export function AskAI({
                 
                 // Show a subtle indicator that code is being generated
                 if (partialDoc.length > 500 && !document.querySelector('.code-generating-toast')) {
-                  const toastElement = toast.success("💻 Generating code in editor...", { 
+                  toast.success("💻 Generating code in editor...", { 
                     duration: 2000,
                     className: 'code-generating-toast'
                   });

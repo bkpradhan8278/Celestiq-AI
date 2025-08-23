@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 /**
  * Google Gemini API Client
  * Handles direct API calls to Google's Gemini models
@@ -129,7 +127,7 @@ export class GeminiClient {
               } else {
                 console.log('⚠️ No text found in candidates:', data.candidates);
               }
-            } catch (parseError) {
+            } catch {
               console.log('⚠️ JSON parse error for line:', line);
               // Skip malformed JSON
               continue;

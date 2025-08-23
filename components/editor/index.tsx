@@ -337,8 +337,6 @@ export const AppEditor = ({ project }: { project?: Project | null }) => {
             );
           }
         }}
-        htmlHistory={htmlHistory}
-        setHtml={setHtml}
         iframeRef={iframeRef}
         device={device}
         setDevice={setDevice}

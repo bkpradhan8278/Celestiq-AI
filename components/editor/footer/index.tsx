@@ -21,17 +21,13 @@ const DEVICES = [
 
 export function Footer({
   onReset,
-  htmlHistory,
-  setHtml,
   device,
   setDevice,
   iframeRef,
   onTabChange,
 }: {
   onReset: () => void;
-  htmlHistory?: HtmlHistory[];
   device: "desktop" | "mobile";
-  setHtml: (html: string) => void;
   iframeRef?: React.RefObject<HTMLIFrameElement | null>;
   setDevice: React.Dispatch<React.SetStateAction<"desktop" | "mobile">>;
   onTabChange?: (tab: string) => void;
