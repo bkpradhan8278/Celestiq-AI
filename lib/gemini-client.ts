@@ -110,19 +110,27 @@ export class GeminiClient {
         buffer = lines.pop() || "";
 
         for (const line of lines) {
-          if (line.trim() && line.startsWith('data: ')) {
+          if (line.trim()) {
             try {
-              const data = JSON.parse(line.slice(6));
+              // Gemini API returns raw JSON, not SSE format
+              const data = JSON.parse(line);
+              console.log('🔍 Raw Gemini response:', data);
+              
               if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+                const text = data.candidates[0].content.parts[0].text;
+                console.log('✅ Found text in response:', text.substring(0, 100));
                 yield {
                   choices: [{
                     delta: {
-                      content: data.candidates[0].content.parts[0].text
+                      content: text
                     }
                   }]
                 };
+              } else {
+                console.log('⚠️ No text found in candidates:', data.candidates);
               }
-            } catch {
+            } catch (parseError) {
+              console.log('⚠️ JSON parse error for line:', line);
               // Skip malformed JSON
               continue;
             }

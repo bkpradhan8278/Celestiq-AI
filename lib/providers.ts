@@ -318,4 +318,36 @@ export const MODELS = [
     autoProvider: "huggingface",
     description: "Larger open-source Google model",
   },
+  
+  // DeepSeek Models
+  {
+    value: "deepseek-ai/DeepSeek-V3-0324",
+    label: "DeepSeek V3",
+    providers: ["deepinfra", "fireworks"],
+    autoProvider: "deepinfra",
+    description: "Advanced DeepSeek model for complex tasks",
+  },
+  {
+    value: "deepseek-ai/deepseek-coder-33b-instruct",
+    label: "DeepSeek Coder 33B",
+    providers: ["deepinfra", "fireworks"],
+    autoProvider: "deepinfra",
+    description: "Specialized coding model",
+  },
+  
+  // Qwen Models
+  {
+    value: "Qwen/Qwen2.5-Coder-32B-Instruct",
+    label: "Qwen2.5 Coder 32B",
+    providers: ["deepinfra", "fireworks"],
+    autoProvider: "deepinfra",
+    description: "Advanced Qwen coding model",
+  },
+  {
+    value: "Qwen/Qwen2.5-72B-Instruct",
+    label: "Qwen2.5 72B",
+    providers: ["deepinfra", "together"],
+    autoProvider: "deepinfra",
+    description: "Large Qwen general model",
+  },
 ];

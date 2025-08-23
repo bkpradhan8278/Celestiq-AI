@@ -77,6 +77,10 @@ export function AskAI({
     setIsThinking(true);
     setStreamingResponse("");
 
+    console.log('🐛 DEBUG: Starting AI call with prompt:', prompt);
+    console.log('🐛 DEBUG: Current HTML length:', html.length);
+    console.log('🐛 DEBUG: Current HTML preview:', html.substring(0, 100) + '...');
+
     // Add user message to conversation
     const userMessage = {
       id: Date.now().toString(),
@@ -185,24 +189,44 @@ export function AskAI({
               setHasAsked(true);
               if (audio.current) audio.current.play();
 
-              // Add AI message to conversation
-              const aiMessage = {
-                id: Date.now().toString(),
-                role: 'assistant' as const,
-                content: contentResponse,
-                timestamp: Date.now()
-              };
-              setMessages(prev => [...prev, aiMessage]);
+              // Clear streaming response - don't add to chat messages
               setStreamingResponse("");
 
               // Now we have the complete HTML including </html>, so set it to be sure
               const finalDoc = contentResponse.match(
                 /<!DOCTYPE html>[\s\S]*<\/html>/
               )?.[0];
+              
+              console.log('🐛 DEBUG: Final response length:', contentResponse.length);
+              console.log('🐛 DEBUG: Contains DOCTYPE:', contentResponse.includes('<!DOCTYPE'));
+              console.log('🐛 DEBUG: Contains </html>:', contentResponse.includes('</html>'));
+              console.log('🐛 DEBUG: Extracted HTML:', finalDoc ? 'Found' : 'Not found');
+              
               if (finalDoc) {
+                console.log('🐛 DEBUG: Setting HTML with length:', finalDoc.length);
                 setHtml(finalDoc);
+                
+                // FORCE Monaco editor update
+                setTimeout(() => {
+                  // Trigger editor update directly
+                  onSuccess(finalDoc, prompt);
+                  onScrollToBottom(); 
+                  toast.success("✨ Sophisticated app generated! Check the Monaco editor on the left.", { 
+                    duration: 4000 
+                  });
+                }, 100);
+              } else {
+                console.log('🐛 DEBUG: No HTML found in response, setting full content');
+                // Force set the content to Monaco editor
+                setHtml(contentResponse);
+                setTimeout(() => {
+                  onSuccess(contentResponse, prompt);
+                  onScrollToBottom();
+                  toast.success("📝 Advanced code generated! Check the Monaco editor on the left.", { 
+                    duration: 4000 
+                  });
+                }, 100);
               }
-              onSuccess(finalDoc ?? contentResponse, prompt);
 
               return;
             }
@@ -211,13 +235,14 @@ export function AskAI({
 
             contentResponse += chunk;
             
-            // Update streaming response for chat display
-            setStreamingResponse(contentResponse);
+            // Don't update streaming response for chat display - only show in editor
+            // setStreamingResponse(contentResponse);
 
             const newHtml = contentResponse.match(
               /<!DOCTYPE html>[\s\S]*/
             )?.[0];
             if (newHtml) {
+              console.log('🐛 DEBUG: Found partial HTML, length:', newHtml.length);
               setIsThinking(false);
               let partialDoc = newHtml;
               if (
@@ -241,6 +266,14 @@ export function AskAI({
               if (now - lastRenderTime > 300) {
                 setHtml(partialDoc);
                 lastRenderTime = now;
+                
+                // Show a subtle indicator that code is being generated
+                if (partialDoc.length > 500 && !document.querySelector('.code-generating-toast')) {
+                  const toastElement = toast.success("💻 Generating code in editor...", { 
+                    duration: 2000,
+                    className: 'code-generating-toast'
+                  });
+                }
               }
 
               if (partialDoc.length > 200) {
@@ -340,7 +373,7 @@ export function AskAI({
         )}
         
         {/* Chat Interface */}
-        <div className="flex-1 overflow-hidden flex flex-col">
+        {/* <div className="flex-1 overflow-hidden flex flex-col">
           {messages.length > 0 && (
             <div className="flex-1 overflow-y-auto px-4 py-2 space-y-4 max-h-[400px]">
               {messages.map((message) => (
@@ -380,7 +413,6 @@ export function AskAI({
                 </div>
               ))}
               
-              {/* Streaming Response */}
               {isAiWorking && streamingResponse && (
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
@@ -402,7 +434,7 @@ export function AskAI({
               )}
             </div>
           )}
-        </div>
+        </div> */}
         <div className="w-full relative flex items-center justify-between">
           {isAiWorking && (
             <div className="absolute bg-neutral-800 rounded-lg bottom-0 left-4 w-[calc(100%-30px)] h-full z-1 flex items-center justify-between max-lg:text-sm">

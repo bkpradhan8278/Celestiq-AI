@@ -73,7 +73,7 @@ export function Settings({
           <header className="flex items-center justify-center text-sm px-4 py-3 border-b gap-2 bg-neutral-950 border-neutral-800 font-semibold text-neutral-200">
             Customize Settings
           </header>
-          <main className="px-4 pt-5 pb-6 space-y-5">
+          <main className="px-4 pt-5 pb-6 space-y-5 overflow-y-auto max-h-[400px]">
             {error !== "" && (
               <p className="text-red-500 text-sm font-medium mb-2 flex items-center justify-between bg-red-500/10 p-2 rounded-md">
                 {error}

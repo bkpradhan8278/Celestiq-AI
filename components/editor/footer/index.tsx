@@ -5,7 +5,6 @@ import { FaLaptopCode } from "react-icons/fa6";
 import { HtmlHistory } from "@/types";
 import { Button } from "@/components/ui/button";
 import { MdAdd } from "react-icons/md";
-import { History } from "@/components/editor/history";
 import { UserMenu } from "@/components/user-menu";
 import { useUser } from "@/hooks/useUser";
 
@@ -80,9 +79,6 @@ export function Footer({
           <MdAdd className="size-3 mr-1" />
           New
         </Button>
-        {htmlHistory && htmlHistory.length > 0 && (
-          <History history={htmlHistory} setHtml={setHtml} />
-        )}
       </div>
       <div className="flex items-center gap-3">
         <Button size="sm" variant="outline" onClick={handleRefreshIframe} className="border-neutral-600 text-gray-400 hover:text-white hover:border-gray-500 p-2 rounded-lg">

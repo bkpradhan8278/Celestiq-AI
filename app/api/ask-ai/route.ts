@@ -25,14 +25,23 @@ export async function POST(request: NextRequest) {
   const body = await request.json();
   const { prompt, provider, model, redesignMarkdown, html } = body;
 
+  console.log('📝 Request received:', {
+    hasPrompt: !!prompt,
+    hasModel: !!model,
+    hasProvider: !!provider,
+    model: model,
+    provider: provider
+  });
+
   if (!model || (!prompt && !redesignMarkdown)) {
+    console.log('❌ Missing required fields:', { model, prompt: !!prompt, redesignMarkdown: !!redesignMarkdown });
     return NextResponse.json(
       { ok: false, error: "Missing required fields" },
       { status: 400 }
     );
   }
 
-  // 🤖 Smart Gemini Model Selection
+    // 🤖 Smart Gemini Model Selection
   // Auto-route to the best Gemini model based on prompt complexity
   let smartModel = model;
   
@@ -61,7 +70,7 @@ export async function POST(request: NextRequest) {
     const hasGoogleAPI = !!(process.env.google_api_key && process.env.google_api_key.length > 0);
     
     if (hasGoogleAPI) {
-      // Smart routing with Google API
+      // Smart routing with Google API - prefer Google models that work
       if (isSimple) {
         smartModel = 'google/gemma-2-3b-it'; // Fast for simple tasks
       } else if (isComplex) {
@@ -70,13 +79,14 @@ export async function POST(request: NextRequest) {
         smartModel = 'google/gemini-2.5-flash-lite'; // Balanced default
       }
     } else {
-      // Fallback to reliable HuggingFace models
+      // Fallback to reliable models from supported providers
+      console.log('⚠️ Google API not available, using reliable fallback models');
       if (isSimple) {
-        smartModel = 'google/gemma-2b-it'; // Small Gemma on HF
+        smartModel = 'Meta-Llama-3.1-8B-Instruct'; // SambaNova fast model
       } else if (isComplex) {
-        smartModel = 'meta-llama/Llama-3.2-3B-Instruct'; // Powerful Llama
+        smartModel = 'Meta-Llama-3.1-70B-Instruct'; // SambaNova powerful model
       } else {
-        smartModel = 'google/gemma-2b-it'; // Default Gemma
+        smartModel = 'Meta-Llama-3.1-8B-Instruct'; // Reliable default
       }
     }
     
@@ -184,39 +194,153 @@ export async function POST(request: NextRequest) {
           console.log(`🔗 Using direct Gemini API for ${smartModel}`);
           const geminiClient = new GeminiClient(process.env.google_api_key);
           
-          const chatCompletion = geminiClient.streamChatCompletion({
-            model: smartModel,
-            messages: [
-              {
-                role: "system",
-                content: INITIAL_SYSTEM_PROMPT,
-              },
-              {
-                role: "user",
-                content: redesignMarkdown
-                  ? `Here is my current design as a markdown:\n\n${redesignMarkdown}\n\nNow, please create a new design based on this markdown.`
-                  : html
-                  ? `Here is my current HTML code:\n\n\`\`\`html\n${html}\n\`\`\`\n\nNow, please create a new design based on this HTML.`
-                  : prompt,
-              },
-            ],
-            max_tokens: selectedProvider.max_tokens,
-          });
+          // DIRECT HTML GENERATION PROMPT - NO EXPLANATIONS, ONLY CODE
+          const enhancedSystemPrompt = `You are a web developer who ONLY generates complete HTML applications. You NEVER provide explanations, blueprints, or architectural descriptions.
 
-          for await (const chunk of chatCompletion) {
-            const content = chunk.choices[0]?.delta?.content;
-            if (content) {
-              await writer.write(encoder.encode(content));
-              completeResponse += content;
+CRITICAL RULES:
+1. ALWAYS start your response with "<!DOCTYPE html>"
+2. NEVER write explanations or text before the HTML code
+3. NEVER use markdown code blocks (no \`\`\`html)
+4. NEVER say "I cannot create" or give limitations
+5. ALWAYS generate a COMPLETE, working HTML file
+6. The HTML must be sophisticated with 1000+ lines of code
+7. Include TailwindCSS, JavaScript animations, and modern design
 
-              if (completeResponse.includes("</html>")) {
-                break;
-              }
+MANDATORY OUTPUT FORMAT:
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Application</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Advanced CSS with animations and gradients */
+    </style>
+</head>
+<body>
+    <!-- Sophisticated application with multiple sections -->
+    <script>
+        /* Advanced JavaScript with interactive features */
+    </script>
+</body>
+</html>
+
+Generate sophisticated applications with:
+- Beautiful modern UI with gradients and animations
+- Interactive components and real-time calculations
+- Professional styling and responsive design
+- Multiple features and comprehensive functionality
+- Advanced JavaScript logic and state management
+- Data visualization and user engagement features
+
+REMEMBER: ONLY output HTML code, NO explanations or text!
+\`- Advanced notification and feedback systems
+- Performance monitoring and optimization features\``;
+
+          // Use single completion for better control
+          console.log('🧪 Testing with single completion first...');
+          try {
+            const singleResponse = await geminiClient.chatCompletion({
+              model: smartModel,
+              messages: [
+                {
+                  role: "system",
+                  content: enhancedSystemPrompt,
+                },
+                {
+                  role: "user",
+                  content: redesignMarkdown
+                    ? `Here is my current design as a markdown:\n\n${redesignMarkdown}\n\nNow, please create a new design based on this markdown.`
+                    : html
+                    ? `Here is my current HTML code:\n\n\`\`\`html\n${html}\n\`\`\` 
+
+Now, please create an enhanced version based on this HTML.`
+                    : `${prompt}
+
+Please create a comprehensive, feature-rich application that includes:
+- Beautiful, modern UI design with gradients and animations
+- Complete functionality for all expected features
+- Interactive elements and user engagement
+- Data validation and error handling
+- Responsive design for all devices
+- Professional styling and visual effects
+- Local storage for data persistence
+- Export/sharing capabilities where relevant
+
+Make this application production-ready and impressive in both design and functionality.`,
+                },
+              ],
+              max_tokens: selectedProvider.max_tokens,
+            });
+            
+            const responseContent = singleResponse.choices[0]?.message?.content || '';
+            console.log('✅ Single completion response:', {
+              length: responseContent.length,
+              hasDoctype: responseContent.includes('<!DOCTYPE'),
+              hasClosingHtml: responseContent.includes('</html>'),
+              preview: responseContent.substring(0, 200)
+            });
+            
+            if (responseContent) {
+              await writer.write(encoder.encode(responseContent));
+              completeResponse = responseContent;
             }
+            
+          } catch (geminiError) {
+            console.error('❌ Gemini API error:', geminiError);
+            throw geminiError;
           }
         } else {
           // Fallback to HuggingFace API
           console.log(`🔗 Using HuggingFace API for ${smartModel}`);
+          
+          // Use the same simple, direct prompt for consistency across providers  
+          const enhancedSystemPrompt = `You are a web developer who ONLY generates complete HTML applications. You NEVER provide explanations, blueprints, or architectural descriptions.
+
+CRITICAL RULES:
+1. ALWAYS start your response with "<!DOCTYPE html>"
+2. NEVER write explanations or text before the HTML code
+3. NEVER use markdown code blocks (no \`\`\`html)
+4. NEVER say "I cannot create" or give limitations
+5. ALWAYS generate a COMPLETE, working HTML file
+6. The HTML must be sophisticated with 1000+ lines of code
+7. Include TailwindCSS, JavaScript animations, and modern design
+
+MANDATORY OUTPUT FORMAT:
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Application</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Advanced CSS with animations and gradients */
+    </style>
+</head>
+<body>
+    <!-- Sophisticated application with multiple sections -->
+    <script>
+        /* Advanced JavaScript with interactive features */
+    </script>
+</body>
+</html>
+
+Generate sophisticated applications with:
+- Beautiful modern UI with gradients and animations
+- Interactive components and real-time calculations
+- Professional styling and responsive design
+- Multiple features and comprehensive functionality
+- Advanced JavaScript logic and state management
+- Data visualization and user engagement features
+
+REMEMBER: ONLY output HTML code, NO explanations or text!
+\`- Advanced notification and feedback systems
+- Performance monitoring and optimization features\``;
+
           const client = new InferenceClient(token);
           const chatCompletion = client.chatCompletionStream(
             {
@@ -225,15 +349,26 @@ export async function POST(request: NextRequest) {
               messages: [
                 {
                   role: "system",
-                  content: INITIAL_SYSTEM_PROMPT,
+                  content: enhancedSystemPrompt,
                 },
                 {
                   role: "user",
                   content: redesignMarkdown
                     ? `Here is my current design as a markdown:\n\n${redesignMarkdown}\n\nNow, please create a new design based on this markdown.`
                     : html
-                    ? `Here is my current HTML code:\n\n\`\`\`html\n${html}\n\`\`\`\n\nNow, please create a new design based on this HTML.`
-                    : prompt,
+                    ? `Here is my current HTML code:\n\n\`\`\`html\n${html}\n\`\`\`
+
+Now, please create an enhanced version based on this HTML.`
+                    : `Generate a complete HTML application for: ${prompt}
+
+REQUIREMENTS:
+- Start response with <!DOCTYPE html>
+- Create sophisticated, interactive application
+- Include beautiful modern design
+- Add multiple features and animations
+- Use TailwindCSS and JavaScript
+- Make it fully functional and professional
+- NO explanations, ONLY HTML code`,
                 },
               ],
               max_tokens: selectedProvider.max_tokens,
@@ -251,14 +386,29 @@ export async function POST(request: NextRequest) {
             if (chunk) {
               await writer.write(encoder.encode(chunk));
               completeResponse += chunk;
+              
+              // Enhanced logging for debugging
+              if (completeResponse.length % 500 === 0) {
+                console.log(`📝 Response length: ${completeResponse.length}, contains DOCTYPE: ${completeResponse.includes('<!DOCTYPE')}, contains </html>: ${completeResponse.includes('</html>')}`);
+              }
 
               if (completeResponse.includes("</html>")) {
+                console.log(`✅ Complete HTML received (${completeResponse.length} chars)`);
                 break;
               }
             }
           }
         }
       } catch (error: any) {
+        console.error('❌ AI API Error:', {
+          message: error.message,
+          model: smartModel,
+          hasGoogleAPI: !!(process.env.google_api_key && process.env.google_api_key.length > 0),
+          responseLength: completeResponse.length,
+          hasDoctype: completeResponse.includes('<!DOCTYPE'),
+          hasClosingHtml: completeResponse.includes('</html>')
+        });
+        
         if (error.message?.includes("exceeded your monthly included credits")) {
           await writer.write(
             encoder.encode(
@@ -282,12 +432,21 @@ export async function POST(request: NextRequest) {
           );
         }
       } finally {
+        // Log final response statistics
+        console.log(`📊 Final response stats:`, {
+          length: completeResponse.length,
+          hasDoctype: completeResponse.includes('<!DOCTYPE'),
+          hasClosingHtml: completeResponse.includes('</html>'),
+          model: smartModel,
+          preview: completeResponse.substring(0, 200) + '...'
+        });
         await writer?.close();
       }
     })();
 
     return response;
   } catch (error: any) {
+    console.error('❌ Streaming error:', error.message);
     return NextResponse.json(
       {
         ok: false,
@@ -352,13 +511,14 @@ export async function PUT(request: NextRequest) {
         smartModel = 'google/gemini-2.5-flash-lite'; // Balanced default
       }
     } else {
-      // Fallback to reliable HuggingFace models
+      // Fallback to reliable HuggingFace models for follow-ups
+      console.log('⚠️ Google API not available for follow-up, using HuggingFace fallback');
       if (isSimple) {
-        smartModel = 'google/gemma-2b-it'; // Small Gemma on HF
+        smartModel = 'meta-llama/Llama-3.2-3B-Instruct'; // Fast and reliable for HTML edits
       } else if (isComplex) {
-        smartModel = 'meta-llama/Llama-3.2-3B-Instruct'; // Powerful Llama
+        smartModel = 'microsoft/DialoGPT-large'; // Better for complex HTML modifications
       } else {
-        smartModel = 'google/gemma-2b-it'; // Default Gemma
+        smartModel = 'meta-llama/Llama-3.2-3B-Instruct'; // Reliable default for HTML edits
       }
     }
     
