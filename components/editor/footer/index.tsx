@@ -2,7 +2,6 @@ import classNames from "classnames";
 import { FaMobileAlt } from "react-icons/fa";
 import { RefreshCcw } from "lucide-react";
 import { FaLaptopCode } from "react-icons/fa6";
-import { HtmlHistory } from "@/types";
 import { Button } from "@/components/ui/button";
 import { MdAdd } from "react-icons/md";
 import { UserMenu } from "@/components/user-menu";
