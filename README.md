@@ -1,6 +1,6 @@
-# ☀️ App Builder
+# 🤖 TapuAi-Web
 
-A futuristic AI-powered website builder with stunning wormhole visual effects. Create beautiful, responsive websites using natural language prompts powered by multiple AI providers.
+A futuristic AI-powered website builder with stunning visual effects. Create beautiful, responsive websites using natural language prompts powered by multiple AI providers.
 
 Built by **Bikram Pradhan** ✨
 
